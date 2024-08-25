@@ -5,8 +5,7 @@ import ListingInfo from "@/app/components/listings/ListingInfo";
 import ListingReservation from "@/app/components/listings/ListingReservation";
 import { categories } from "@/app/components/navbar/Categories";
 import useLoginModal from "@/app/hooks/useLoginModal";
-import { SafeListing, SafeUser } from "@/app/types";
-import { Reservation } from "@prisma/client";
+import { SafeListing, SafeReservations, SafeUser } from "@/app/types";
 import axios from "axios";
 import { differenceInCalendarDays, eachDayOfInterval } from "date-fns";
 import { useRouter } from "next/navigation";
@@ -21,7 +20,7 @@ const initialDateRange = {
 };
 
 type Props = {
-  reservation?: Reservation[];
+  reservation?: SafeReservations[];
   listing: SafeListing & { user: SafeUser };
   currentUser?: SafeUser | null;
 };
@@ -43,7 +42,7 @@ const ListingClient: FC<Props> = ({
         end: new Date(reservation.endDate),
       });
 
-      dates: [...dates, ...range];
+      dates = [...dates, ...range];
     });
 
     return dates;
@@ -60,6 +59,24 @@ const ListingClient: FC<Props> = ({
 
     setIsLoading(true);
 
+    const isOverlapping = reservation.some((res) => {
+      const newStart = dateRange.startDate;
+      const newEnd = dateRange.endDate;
+      const existingStart = new Date(res.startDate);
+      const existingEnd = new Date(res.endDate);
+
+      return (
+        (newStart && newStart >= existingStart && newStart < existingEnd) ||
+        (newEnd && newEnd > existingStart && newEnd <= existingEnd) ||
+        (newStart && newStart <= existingStart && newEnd! >= existingEnd)
+      );
+    });
+
+    if (isOverlapping) {
+      setIsLoading(false);
+      return toast.error("These dates overlap with existing reservations");
+    }
+
     axios
       .post("/api/reservations", {
         totalPrice,
@@ -75,6 +92,7 @@ const ListingClient: FC<Props> = ({
       })
       .catch((error) => {
         toast.error("Failed to reserve listing");
+        console.error(error);
       })
       .finally(() => {
         setIsLoading(false);
