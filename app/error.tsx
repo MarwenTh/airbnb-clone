@@ -6,7 +6,7 @@ type Props = {
   error: Error;
 };
 
-const error: FC<Props> = ({ error }) => {
+const Error: FC<Props> = ({ error }) => {
   useEffect(() => {
     console.error(error);
   }, [error]);
@@ -20,4 +20,4 @@ const error: FC<Props> = ({ error }) => {
   );
 };
 
-export default error;
+export default Error;
