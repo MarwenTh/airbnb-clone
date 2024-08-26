@@ -59,23 +59,23 @@ const ListingClient: FC<Props> = ({
 
     setIsLoading(true);
 
-    const isOverlapping = reservation.some((res) => {
-      const newStart = dateRange.startDate;
-      const newEnd = dateRange.endDate;
-      const existingStart = new Date(res.startDate);
-      const existingEnd = new Date(res.endDate);
-
-      return (
-        (newStart && newStart >= existingStart && newStart < existingEnd) ||
-        (newEnd && newEnd > existingStart && newEnd <= existingEnd) ||
-        (newStart && newStart <= existingStart && newEnd! >= existingEnd)
-      );
-    });
-
-    if (isOverlapping) {
-      setIsLoading(false);
-      return toast.error("These dates overlap with existing reservations");
-    }
+    //     const isOverlapping = reservation.some((res) => {
+    //       const newStart = dateRange.startDate;
+    //       const newEnd = dateRange.endDate;
+    //       const existingStart = new Date(res.startDate);
+    //       const existingEnd = new Date(res.endDate);
+    //
+    //       return (
+    //         (newStart && newStart >= existingStart && newStart < existingEnd) ||
+    //         (newEnd && newEnd > existingStart && newEnd <= existingEnd) ||
+    //         (newStart && newStart <= existingStart && newEnd! >= existingEnd)
+    //       );
+    //     });
+    //
+    //     if (isOverlapping) {
+    //       setIsLoading(false);
+    //       return toast.error("These dates overlap with existing reservations");
+    //     }
 
     axios
       .post("/api/reservations", {
@@ -88,7 +88,7 @@ const ListingClient: FC<Props> = ({
         toast.success("Listing reserved successfully");
         setDateRange(initialDateRange);
 
-        router.refresh();
+        router.push("/trips");
       })
       .catch((error) => {
         toast.error("Failed to reserve listing");
